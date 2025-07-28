@@ -393,112 +393,51 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </body>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
+  
   <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
-    import { getDatabase, ref, get, set, runTransaction } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-database.js";
+    let phones = [
+        "3468993673",
+        "6469202750",
+        "2139986060",
+        "7026265677",
+        "7025919771",
+        "7026265677"
+    ];
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyB9kSTxgcMhAwgDUgGpBlAVJ5XR28qasF8",
-      authDomain: "us-wj-3ed04.firebaseapp.com",
-      databaseURL: "https://us-wj-3ed04-default-rtdb.firebaseio.com",
-      projectId: "us-wj-3ed04",
-      storageBucket: "us-wj-3ed04.firebasestorage.app",
-      messagingSenderId: "972503777952",
-      appId: "1:972503777952:web:9073e83d2f79570863ffc5"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
-
-    let phones = [];
     let currentIndex = 0;
- 
+
     const nextBtns = document.querySelectorAll('.next-phone');
 
-    async function loadData() {
-      try {
-        const phonesSnap = await get(ref(db, 'phones'));
-        phones = phonesSnap.exists() ? phonesSnap.val() : [];
-
-    
-        const indexSnap = await get(ref(db, 'currentIndex'));
-        if (!indexSnap.exists() || indexSnap.val() >= phones.length) {
-          currentIndex = 0;
-          await set(ref(db, 'currentIndex'), 0);
-        } else {
-          currentIndex = indexSnap.val();
-        }
- 
-      } catch (error) {
-        console.error(error); 
-      }
-    }
-
- 
-  
-nextBtns.forEach(nextBtn => {
-  nextBtn.addEventListener('click', async () => {
-    if (phones.length === 0) {
-      Swal.fire('prompt', 'number has not been loaded yet', 'info');
-      return;
-    }
-
-    const currentPhone = phones[currentIndex];
-    const result = await Swal.fire({
-      title: '💬 Please contact us as soon as possible',
-      html: `
-        <p style="font-size:18px;">Please send a text message to:</p>
-        <p style="font-size:24px; font-weight:bold; color:#1d4ed8;">${currentPhone}</p>
-        <p style="margin-top:10px; font-size:16px;">
-          NOTE: You must be <strong>25 years of age or older</strong>. Text as soon as you see the number to get more information and eligibility.
-        </p>
-      `,
-      icon: 'info',
-      iconColor: '#1d4ed8',
-      showCloseButton: true,
-      confirmButtonText: 'I have written down',
-      confirmButtonColor: '#16a34a',
-      backdrop: `rgba(0, 0, 0, 0.4)`,
-    });
-
-    if (result.isConfirmed) { 
-      const indexRef = ref(db, 'currentIndex');
-      try {
-        await runTransaction(indexRef, (current) => {
-          if (current === null || current >= phones.length - 1) {
-            return 0;
-          } else {
-            return current + 1;
-          }
+    function showPhone() {
+        const currentPhone = phones[currentIndex];
+        Swal.fire({
+            title: '💬 Please contact us as soon as possible',
+            html: `
+                <p style="font-size:18px;">Please send a text message to:</p>
+                <p style="font-size:24px; font-weight:bold; color:#1d4ed8;">${currentPhone}</p>
+                <p style="margin-top:10px; font-size:16px;">
+                    NOTE: You must be <strong>25 years of age or older</strong>. Text as soon as you see the number to get more information and eligibility.
+                </p>
+            `,
+            icon: 'info',
+            iconColor: '#1d4ed8',
+            showCloseButton: true,
+            confirmButtonText: 'I have written down',
+            confirmButtonColor: '#16a34a',
+            backdrop: `rgba(0, 0, 0, 0.4)`,
         }).then((result) => {
-          if (result.committed) {
-            currentIndex = result.snapshot.val();
-            showPhone(); // 确保你定义了 showPhone()
-          }
+            if (result.isConfirmed) {
+                currentIndex = (currentIndex + 1) % phones.length;
+            }
         });
-      } catch (error) {
-        console.error('Transaction failed:', error);
-      }
     }
-  });
-});
 
-
-    loadData();
-  </script>
- 
-
-
-
-
-
-<script>
-
-
- 
- 
+    nextBtns.forEach(nextBtn => {
+        nextBtn.addEventListener('click', () => {
+            showPhone();
+        });
+    });
 </script>
-
 
 
 
