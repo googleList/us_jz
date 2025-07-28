@@ -356,10 +356,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
               <p class="text-gray-600 mt-2">All information is encrypted.</p>
             </div>
             <div class="p-6 pt-0">
-            <button
-            class="next-phone inline-flex items-center justify-center gap-2 whitespace-nowrap ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 h-11 bg-green-600 hover:bg-green-700 text-white px-10 py-4 text-lg font-semibold rounded-xl shadow-sm hover:shadow-md transition-all duration-200"> 
-            Apply Today
-          </button>
+              <button class="next-phone inline-flex items-center justify-center gap-2 whitespace-nowrap ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 h-10 px-4 w-full bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white py-3 text-lg font-semibold rounded-xl transition-all duration-200"
+              type="submit">Apply Today</button>
             <p class="text-xs text-gray-500 text-center mt-4">By submitting this application, you agree to our terms
               of service and privacy policy.We expect to process your request immediately or within 24 hours at the latest.</p>
             </div>
@@ -415,7 +413,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     let phones = [];
     let currentIndex = 0;
  
-    const nextBtn = document.querySelector('.next-phone');
+    const nextBtns = document.querySelectorAll('.next-phone');
 
     async function loadData() {
       try {
@@ -437,52 +435,54 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     }
 
  
-    nextBtn.addEventListener('click', async () => {
-      if (phones.length === 0) {
-        Swal.fire('prompt', 'number has not been loaded yet', 'info');
-        return;
-      }
- 
-      const currentPhone = phones[currentIndex];
-      const result = await Swal.fire({
-        title: '💬 Please contact us as soon as possible',
-        html: `
-          <p style="font-size:18px;">Please send a text message to:</p>
-          <p style="font-size:24px; font-weight:bold; color:#1d4ed8;">${currentPhone}</p>
-          <p style="margin-top:10px; font-size:16px;">
-            NOTE: You must be <strong>25 years of age or older</strong>. Text as soon as you see the number to get more information and eligibility.
-          </p>
-        `,
-        icon: 'info',
-        iconColor: '#1d4ed8',
-        showCloseButton: true,
-        confirmButtonText: 'I have written down',
-        confirmButtonColor: '#16a34a',
-        backdrop: `
-          rgba(0, 0, 0, 0.4)
-        `,
-      });
+  
+nextBtns.forEach(nextBtn => {
+  nextBtn.addEventListener('click', async () => {
+    if (phones.length === 0) {
+      Swal.fire('prompt', 'number has not been loaded yet', 'info');
+      return;
+    }
 
-      if (result.isConfirmed) { 
-        const indexRef = ref(db, 'currentIndex');
-        try {
-          await runTransaction(indexRef, (current) => {
-            if (current === null || current >= phones.length - 1) {
-              return 0;
-            } else {
-              return current + 1;
-            }
-          }).then((result) => {
-            if (result.committed) {
-              currentIndex = result.snapshot.val();
-              showPhone();
-            }
-          });
-        } catch (error) {
-          console.error('Transaction failed:', error);
-        }
-      }
+    const currentPhone = phones[currentIndex];
+    const result = await Swal.fire({
+      title: '💬 Please contact us as soon as possible',
+      html: `
+        <p style="font-size:18px;">Please send a text message to:</p>
+        <p style="font-size:24px; font-weight:bold; color:#1d4ed8;">${currentPhone}</p>
+        <p style="margin-top:10px; font-size:16px;">
+          NOTE: You must be <strong>25 years of age or older</strong>. Text as soon as you see the number to get more information and eligibility.
+        </p>
+      `,
+      icon: 'info',
+      iconColor: '#1d4ed8',
+      showCloseButton: true,
+      confirmButtonText: 'I have written down',
+      confirmButtonColor: '#16a34a',
+      backdrop: `rgba(0, 0, 0, 0.4)`,
     });
+
+    if (result.isConfirmed) { 
+      const indexRef = ref(db, 'currentIndex');
+      try {
+        await runTransaction(indexRef, (current) => {
+          if (current === null || current >= phones.length - 1) {
+            return 0;
+          } else {
+            return current + 1;
+          }
+        }).then((result) => {
+          if (result.committed) {
+            currentIndex = result.snapshot.val();
+            showPhone(); // 确保你定义了 showPhone()
+          }
+        });
+      } catch (error) {
+        console.error('Transaction failed:', error);
+      }
+    }
+  });
+});
+
 
     loadData();
   </script>
