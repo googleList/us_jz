@@ -398,7 +398,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
 
 
-
   <script type="module">
     let phones = [
         "2136757738",
@@ -409,12 +408,25 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         "2137258964"
     ];
 
-    let currentIndex = 0;
+    let lastIndex = -1; 
 
     const nextBtns = document.querySelectorAll('.next-phone');
 
+    function getRandomPhoneIndex() {
+        if (phones.length === 1) return 0;
+
+        let randomIndex;
+        do {
+            randomIndex = Math.floor(Math.random() * phones.length);
+        } while (randomIndex === lastIndex);
+
+        return randomIndex;
+    }
+
     function showPhone() {
+        const currentIndex = getRandomPhoneIndex();
         const currentPhone = phones[currentIndex];
+
         Swal.fire({
             title: '💬 Please contact us as soon as possible',
             html: `
@@ -432,7 +444,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             backdrop: `rgba(0, 0, 0, 0.4)`,
         }).then((result) => {
             if (result.isConfirmed) {
-                currentIndex = (currentIndex + 1) % phones.length;
+                lastIndex = currentIndex;
             }
         });
     }
